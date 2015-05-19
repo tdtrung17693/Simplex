@@ -1,0 +1,9 @@
+.app-title {
+	font-weight: 300;
+}
+
+button.btn.btn-default.dropdown-toggle {
+    background-color: #1BBC9B;
+    border-color: #1BBC9B;
+    color: #EEE;
+}
