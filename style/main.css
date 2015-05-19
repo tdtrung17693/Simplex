@@ -3,7 +3,20 @@
 }
 
 button.btn.btn-default.dropdown-toggle {
-    background-color: #1BBC9B;
-    border-color: #1BBC9B;
-    color: #EEE;
+  background-color: #1BBC9B;
+  border-color: #1BBC9B;
+  color: #EEE;
+}
+
+.condition {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.condition .btn-del {
+  position: absolute;
+  right: 0;
+  margin-right: -35px;
+  top: 0;
+  margin-top: 5px;
 }

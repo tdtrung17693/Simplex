@@ -1,42 +1,51 @@
 <div class="row">
-	<form method="POST" class="form-horizontal" role="form">
+	<form method="POST" class="form-horizontal col-md-12 col-lg-12" role="form" ng-submit="solve()">
 		<div class="form-group">
 			<label>Enter z:</label>
 		</div>
 		<div class="form-group flat-bd-bot">
 		 	<div class="input-group">
-		        <div class="input-group-btn">
-			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Max <span class="caret"></span></button>
-			        <ul class="dropdown-menu" role="menu">
-						<li><a href="#">Max</a></li>
-						<li><a href="#">Min</a></li>
-			        </ul>
-			    </div>
-			    <input type="text" class="form-control" style="border-left: none;" ng-model="az">
+        <div class="input-group-btn">
+	        <button type="button" class="btn btn-default dropdown-toggle choice-indicate" data-toggle="dropdown" aria-expanded="false"><span class="text">Max</span> <span class="caret"></span></button>
+	        <ul class="dropdown-menu choice-list" role="menu">
+						<li><a data-choice="1">Max</a></li>
+						<li><a data-choice="2">Min</a></li>
+	        </ul>
 		    </div>
+		    <input type="text" class="form-control" style="border-left: none;" ng-model="z.f">
+	    </div>
 		</div>
 		<div class="form-group">
 			<label>Subject to:</label>
 		</div>
 		<div class="form-group">
-			<div class="row">
-				<div class="col-sm-8 col-lg-8">
-					<input type="text" class="form-control">
-				</div>
-				<div class="col-sm-1 col-lg-1">
-					<input type="text" class="form-control">
-				</div>
-				<div class="col-sm-3 col-lg-3">
-					<input type="text" class="form-control">
-				</div>
-			</div>
+			<cond ng-repeat="condition in conditions" data="condition"/>
 		</div>
 		<div class="form-group pull-right">
-			<button type="submit" class="btn btn-info"><i class="fui-plus-circle"></i> Add new condition</button>
+			<button type="submit" class="btn btn-info" ng-click="addNewCond($event)"><i class="fui-plus-circle"></i> Add new condition</button>
 		</div>
 
 		<div class="form-group pull-left">
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</div>
 	</form>
+</div>
+
+<div class="row">
+	<div class="col-md-6 col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">Canonical Form</div>
+			<div class="panel-body">
+				<div id="solution"></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6 col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">Result:</div>
+			<div class="panel-body">
+				<div id="matrix"></div>
+			</div>
+		</div>
+	</div>
 </div>
