@@ -1,28 +1,35 @@
 'use strict';
 
 app.controller('simplexCtrl', ['$scope', function($scope){
-	var elemPattern = /([\w^]+)/g,
-		  blockPattern = /([-\d]+\w|[\d\w]+)/g,
+	var elemPattern = /(-[\w]+|[\w]+)/g,
+		  blockPattern = /(-[\w]+|[\w]+)/g,
       varPattern = /(?!\d)([\w^\d]+)/g,
-      numPattern = /([-\d]+)/g;
+      numPattern = /^([-\d]+)/g;
 		
-	$scope.z = {type: 1, f: ""};
+	$scope.f = {type: "max", z: ""};
 	$scope.conditions = [{p1: "", op: "", p2: ""}];
 
 	$scope.solve = function () {
-		var canonical = getCanonical();
+    var allVar = getVariableList();
+    var simplex = new Simplex($scope.f, $scope.conditions, allVar);
 
-		printCanonicalForm(canonical.constraints);
-		printMtrx(canonical.matrix);
+    var solution = simplex.solve();
 
-		if (canonical.has2Phase.length > 0) {
-			
-		}
+    var result = '<div class="var-value">'
+        + '<p>Value of <strong>x</strong></p>'
+        + '<div id="matrix"></div>'
+        + '</div>'
+        + '<div class="result">'
+        + '<strong>Result: </strong> <span></span>'
+        +'</div>';
+    $(".panel.result > .panel-body").html(result);
+
+    printMtrx(solution.var_value, "matrix");
+    printCanonicalForm(solution.canonical);
+    $(".result > span").text(solution.result);
+
+    console.log(solution);
 	};
-
-	function solvePhase1(canonical) {
-		if (canonical)
-	}
 
 	$scope.addNewCond = function ($event) {
 		$event.preventDefault();
@@ -30,7 +37,7 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 	}
 
 
-	function printMtrx(mtrx) {
+	function printMtrx(mtrx, id) {
 		var col = mtrx.length,
 				str = "\\(\\begin{vmatrix} ";
 
@@ -40,8 +47,8 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 
     str += "\\end{vmatrix}\\)";
     console.log(str);
-    $("#matrix").html(str);
-    MathJax.Hub.Queue(["Typeset", MathJax.Hub, "matrix"]);
+    $("#"+id).html(str);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, id]);
 	}
 
 	function parseConditions() {
@@ -58,29 +65,16 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 		return conditions;
 	}
 
-	function getCanonical() {
-		var result = {constraints: null, matrix: null},
-			varList = getVariableList(),
-			varCount = varList.length,
-			block,
-			parsedConditions = (parseConditions());
-
-		result.constraints = Constraint.getCanonicalForm(parsedConditions);
-		result.has2Phase = result.constraints[1];
-		result.constraints = result.constraints[0];
-		result.matrix = Constraint.getConstraintMatrix(result.constraints);
-		return result;
-	}
 
 	function printCanonicalForm(result) {
 		var condEl;
 
-		$("#solution").html("");
+		$("#canonical").html("");
 		for (var i = 0; i < result.length; ++i) {
 			condEl = $("<p />", {class:"cond-"+i}).text("\\(" + result[i].toString() + "\\)");
-			$("#solution").append(condEl);
+			$("#canonical").append(condEl);
 		}
-		MathJax.Hub.Queue(["Typeset", MathJax.Hub, "solution"]);
+		MathJax.Hub.Queue(["Typeset", MathJax.Hub, "canonical"]);
 	}
 
 	function getVariableList() {
@@ -110,7 +104,7 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 	}
 
 	function getObjFuncVar() {
-		return $scope.z.f.match(varPattern);
+		return $scope.f.z.match(varPattern);
 	}
 
 	function getCondVar() {
@@ -137,282 +131,8 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 
 			$(".choice-indicate > .text").text(that.text());
 			$scope.$apply(function() {
-				$scope.z.type = that.data("choice");
+				$scope.f.type = that.data("choice");
 			});
 		});
 	});
 }]);
-
-function Element(varName, coef) {
-  this.var = varName;
-  this.coef = parseInt(coef);
-
-  this.getVar = function () {
-    return this.var;
-  };
-
-  this.getCoef = function () {
-    return this.coef;
-  };
-
-  this.toString = function () {
-    if (coef >= 0) {
-      return ((this.coef == 1) ? "" : this.coef) + this.var;
-    } else {
-      return ((this.coef == -1) ? "-" : this.coef) + this.var;
-    }
-  };
-}
-
-
-function Constraint(elements, op, rside, varList) {
-  var blockPattern = /([-\d]+\w|[\d\w]+)/g,
-      varPattern = /(?!\d)([\w^\d]+)/g,
-      numPattern = /([-\d]+)/g;
-      
-  this.artVar = [];
-  this.mainVar = varList.concat([]);
-  this.allVarList = varList;
-  this.elements = elements;
-  this.op = op;
-  this.rside = rside;
-}
-
-Constraint.prototype.getMatrixRow = function () {
-  var lside = this.elements.concat([]).sort(function (i1,i2) {
-    if (i1.var.indexOf("_") == -1 && i2.var.indexOf("_") == -1 && i1.var.charCodeAt(0) > i2.var.charCodeAt(0)) {
-      return 1;
-    } else if (i1.var.indexOf("_") == -1 && i2.var.indexOf("_") == -1 && i1.var.charCodeAt(0) == i2.var.charCodeAt(0)) {
-      return 0;
-    } else if (i1.var.indexOf("_") == -1 && i2.var.indexOf("_") == -1 && i1.var.charCodeAt(0) < i2.var.charCodeAt(0)) {
-      return -1;
-    } else if (i1.var.indexOf("_") > -1 && i2.var.indexOf("_") > -1) {
-      var num1 = i1.var.split("_")[1],
-          num2 = i2.var.split("_")[1];
-
-      if (num1 > num2) {
-        return 1;
-      } else if (num1 < num2) {
-        return -1;
-      } else {
-        return 0;
-      }
-    }
-  });   
-
-  var count = lside.length,
-      row = [],
-      allVarCount = this.allVarList.length,
-      coef;
-
-  var lsideVarName = lside.map(function (item) {
-    return item.var;
-  });
-
-  for (var i = 0; i < allVarCount; ++i) {
-    if (lsideVarName.indexOf(this.allVarList[i]) == - 1) {
-      row.push(0);
-    } else {
-      coef = this.elements[lsideVarName.indexOf(this.allVarList[i])].getCoef();
-      row.push(coef);
-    }
-  }
-
-  return row;
-}
-
-Constraint.prototype.addNewArtElem = function (varName, coef) {
-  this.elements.push(new Element(varName, coef));
-  this.allVarList.push(varName);
-  this.artVar.push(varName);
-}
-
-Constraint.prototype._getSignChangedCondition = function () {
-  var elCount = this.elements.length,
-      tempEl,
-      tempLside = "",
-      tempRside = this.rside,
-      tempOp = this.op;
-
-  for (var i = 0; i < elCount; ++i) {
-    if (this.elements[i].getCoef() < 0) {
-      tempLside += ((i == 0) ? "" : "+") + this.elements[i].toString().replace("-","");
-    } else {
-      tempLside += "-" + this.elements[i].toString();
-    }
-  }
-
-  if (tempRside < 0) {
-    tempRside = tempRside.replace("-", "");
-  }
-
-  if (tempOp == ">=") {
-    tempOp = "<=";
-  } else if (tempOp == "<=") {
-    tempOp = ">=";
-  }
-
-  return Constraint.parseCond({p1: tempLside, op: tempOp, p2: tempRside}, this.allVarList);
-}
-
-// Constraint.getCanonicalForm = function (constraints) {
-//   var mtrx = Constraint.getConstraintMatrix(constraints);
-//   var checkUnitMatrix = Constraint.checkUnitMatrix(mtrx);
-
-//   if (checkUnitMatrix.length != constraints.length) {
-
-//   }
-// }
-
-Constraint.getCanonicalForm = function (constraints) {
-  var result,
-  		nVarName = "",
-  		have2Phase = [];
-      
-  constraints = constraints.map(function ($constraint) {
-    if ($constraint.rside < 0) {
-      result = $constraint._getSignChangedCondition($constraint);
-    } else {
-      result = $constraint;
-    }
-
-    if (result.op != "=") {
-      nVarName = "x_" + ($constraint.allVarList.length + 1);
-    }
-
-    if (result.op == ">=") {
-      result.addNewArtElem(nVarName, -1);
-    } else if (result.op == "<=") {
-      result.addNewArtElem(nVarName, 1);
-    }
-    
-    result.op = "=";
-
-    return result;
-  });
-
-  var constraintMtrx = Constraint.getConstraintMatrix(constraints);
- 
-  var lackUnitMtx = Constraint.checkUnitMatrix(constraintMtrx);
-
-  console.log(lackUnitMtx);
-  if (lackUnitMtx.length != constraints.length) {
-    for (var i = 0; i < constraints.length; ++i) {
-      if (lackUnitMtx.indexOf(i+1) == -1) {
-        nVarName = "x_" + (constraints[i].allVarList.length + 1);
-        has2Phase.push(nVarName);
-        constraints[i].addNewArtElem(nVarName, 1);
-      }
-    }
-  }
-  
-  return [constraints, has2Phase];
-}
-
-Constraint.getConstraintMatrix = function (constraints) {
-  var matrix = [],
-      cCount = constraints.length;
-
-  for (var i = 0; i < cCount; ++i) {
-    matrix.push(constraints[i].getMatrixRow());
-  }
-
-  return matrix;
-}
-
-Constraint.checkUnitMatrix = function (constraints) {
-  var hasUnitMatrix = false,
-      cCount = constraints.length;// constraint count
-
-  var checkMtx = 0,
-      i = 0,
-      previ = [],
-      hasOne = 0;
-
-  for (var j = 0; j < constraints[0].length; ++j) {
-    for (var k = 0; k < cCount; ++k) {
-      if (constraints[k][j] != 0 && constraints[k][j] != 1) {
-        hasOne = 0;
-        break;
-      }
-
-      if (constraints[k][j] == 1 && !hasOne) {
-        hasOne = k+1;
-        if (k == (cCount - 1)) {
-          if (previ.indexOf(hasOne) == -1) {
-            ++checkMtx;
-            previ.push(hasOne);
-          }
-          hasOne = 0;
-        }
-      } else if (hasOne && constraints[k][j] != 0) {
-        hasOne = 0;
-        break;
-      } else if (k == (cCount - 1) && hasOne) {
-        if (previ.indexOf(hasOne) == -1) {
-          ++checkMtx;
-          previ.push(hasOne);
-        }
-        hasOne = 0;
-      }
-    }
-  }
-
-  if (checkMtx >= cCount) {
-    hasUnitMatrix = true;
-  }
-  
-  return previ;
-}
-
-Constraint._clone = function (obj) {
-  if(obj === null || typeof(obj) !== 'object')
-      return obj;
-
-  var temp = obj.constructor(); // changed
-
-  for(var key in obj) {
-      if(Object.prototype.hasOwnProperty.call(obj, key)) {
-          temp[key] = clone(obj[key]);
-      }
-  }
-  return temp;
-}
-
-Constraint.prototype.toString = function () {
-  var str = "",
-      elCount = this.elements.length;
-      
-  for (var i = 0; i < elCount; ++i) {
-    if (this.elements[i].getCoef() > 0) {
-      str += ((i == 0) ? "" : "+") + this.elements[i].toString();
-    } else {
-      str += this.elements[i].toString();
-    }
-  }
-
-  return str + this.op + this.rside;
-}
-
-Constraint.parseCond = function (condition, varList) {
-  var elements = Constraint.parseElements(condition.p1);
-
-  return  new Constraint(elements, condition.op, condition.p2, varList);
-}
-
-Constraint.parseElements = function (func) {
-  var lsideEl = func.match(/([-\d]+\w|[\d\w]+)/g),
-        count = lsideEl.length,
-        elArr = [],
-        coef, varName;
-
-  for (var i = 0; i < count; ++i) {
-    coef = lsideEl[i].match(/([-\d]+)/g);
-    coef = (coef == null) ? 1 : ((coef[0] === "-") ? -1 : parseInt(coef[0]));
-    varName = lsideEl[i].match(/(?!\d)([\w^\d]+)/g);
-
-    elArr.push(new Element(varName[0], coef));
-  }
-
-  return elArr;
-}
