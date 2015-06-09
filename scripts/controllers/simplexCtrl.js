@@ -7,35 +7,54 @@ app.controller('simplexCtrl', ['$scope', function($scope){
       numPattern = /^([-\d]+)/g;
 		
 	$scope.f = {type: "max", z: ""};
-	$scope.conditions = [{p1: "", op: "", p2: ""}];
-
+	$scope.constraints = [{p1: "", op: "", p2: ""}];
+  $scope.cantSolve = false;
 	$scope.solve = function () {
+
     var allVar = getVariableList();
-    var simplex = new Simplex($scope.f, $scope.conditions, allVar);
+    var simplex = new Simplex($scope.f, $scope.constraints, allVar);
 
     var solution = simplex.solve();
 
-    var result = '<div class="var-value">'
-        + '<p>Value of <strong>x</strong></p>'
-        + '<div id="matrix"></div>'
-        + '</div>'
-        + '<div class="result">'
-        + '<strong>Result: </strong> <span></span>'
-        +'</div>';
-    $(".panel.result > .panel-body").html(result);
+    if ( !solution ) {
+      $scope.cantSolve = true;
+    } else {
+      $scope.cantSolve = false;
+      
+      var result = '<div class="var-value">'
+          + '<p>Value of <strong>x</strong></p>'
+          + '<div id="matrix"></div>'
+          + '</div>'
+          + '<div class="result">'
+          + '<strong>Result: </strong> <span></span>'
+          +'</div>';
+      $(".panel.result > .panel-body").html(result);
 
-    printMtrx(solution.var_value, "matrix");
-    printCanonicalForm(solution.canonical);
-    $(".result > span").text(solution.result);
+      printMtrx(solution.var_value, "matrix");
+      printCanonicalForm(solution.canonical);
+      $(".result > span").text(solution.result);
 
-    console.log(solution);
+      $(".tableaus > .panel-body").html("");
+
+      var tableaus = Tabular.getTableaus(solution.tableaus);
+
+      for (var i = 0; i < tableaus.length; ++i) {
+        Tabular.printTableau(tableaus[i],allVar,solution.art_var, solution.phase);
+      }
+
+      MathJax.Hub.Queue(["Typeset", MathJax.Hub, "tableaus"]);
+    }
 	};
 
-	$scope.addNewCond = function ($event) {
+	$scope.addNewConstraint = function ($event) {
 		$event.preventDefault();
-		$scope.conditions.push({p1: "", op: "", p2: ""});
+		$scope.constraints.push({p1: "", op: "", p2: ""});
 	}
 
+  $scope.removeConstraint = function (constraint) {
+    $scope.constraints.splice($scope.constraints.indexOf(constraint), 1);
+    console.log($scope.constraints);
+  }
 
 	function printMtrx(mtrx, id) {
 		var col = mtrx.length,
@@ -53,11 +72,11 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 
 	function parseConditions() {
 		var conditions = [], condition,
-				condCount = $scope.conditions.length,
+				condCount = $scope.constraints.length,
 				varList = getVariableList();
 
 		for (var i = 0; i < condCount; ++i) {
-			condition = Constraint.parseCond($scope.conditions[i], varList);
+			condition = Constraint.parseCond($scope.constraints[i], varList);
 			condition.order = i+1;
 			conditions.push(condition);
 		}
@@ -74,6 +93,7 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 			condEl = $("<p />", {class:"cond-"+i}).text("\\(" + result[i].toString() + "\\)");
 			$("#canonical").append(condEl);
 		}
+
 		MathJax.Hub.Queue(["Typeset", MathJax.Hub, "canonical"]);
 	}
 
@@ -109,7 +129,7 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 
 	function getCondVar() {
 		var result = [];
-		angular.forEach($scope.conditions, function (cond, $idx) {
+		angular.forEach($scope.constraints, function (cond, $idx) {
 			var condVar = cond.p1.match(varPattern);
 				
 			var	len = condVar.length;

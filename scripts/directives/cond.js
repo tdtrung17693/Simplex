@@ -7,7 +7,8 @@ app.directive('cond', [function(){
 		// priority: 1,
 		// terminal: true,
 		scope: {
-			data: "="
+			data: "=",
+			remove: "&"
 		}, // {} = isolate, true = child, false/undefined = no change
 		templateUrl: 'views/cond.html',
 		replace: true,

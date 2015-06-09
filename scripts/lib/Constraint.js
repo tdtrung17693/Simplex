@@ -234,7 +234,7 @@ Constraint.prototype.toString = function () {
 Constraint.parseCond = function (condition, varList) {
   var elements = Constraint.parseElements(condition.p1);
 
-  return  new Constraint(elements, condition.op, condition.p2, varList);
+  return  new Constraint(elements, condition.op, parseInt(condition.p2), varList);
 }
 
 Constraint.parseElements = function (func) {

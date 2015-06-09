@@ -58,7 +58,7 @@ ObjectiveFunction.parseElements = function (func) {
     coef = (coef == null) ? 1 : ((coef[0] === "-") ? -1 : parseInt(coef[0]));
     varName = lsideEl[i].match(/(?!\d)([\w^\d]+)/g);
 
-    elArr.push(new Element(varName[0], coef));
+    elArr.push(new Element(varName[0], parseInt(coef)));
   }
 
   return elArr;
