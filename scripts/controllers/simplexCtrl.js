@@ -21,7 +21,7 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 	};
 
 	function solvePhase1(canonical) {
-		if (canonical)
+
 	}
 
 	$scope.addNewCond = function ($event) {
