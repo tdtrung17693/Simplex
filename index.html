@@ -32,16 +32,25 @@
 		<script src="//cdnjs.cloudflare.com/ajax/libs/flat-ui/2.3.0/js/flat-ui.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/flat-ui/2.3.0/js/vendor/respond.min.js"></script>
 
+		<script src="scripts/lib/Element.js"></script>
+		<script src="scripts/lib/Constraint.js"></script>
+		<script src="scripts/lib/ObjectiveFunction.js"></script>
+		<script src="scripts/lib/Simplex.js"></script>
+		<script src="scripts/lib/Tabular.js"></script>
+
 		<!-- Main Script -->
 		<script src="scripts/app.js"></script>
 		<script src="scripts/controllers/simplexCtrl.js"></script>
 		<script src="scripts/controllers/resultCtrl.js"></script>
 		<script src="scripts/directives/cond.js"></script>
+		
 		<script type="text/x-mathjax-config">
-		MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+		MathJax.Hub.Config({
+	    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+	  });
 		</script>
 		<script type="text/javascript"
-		  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+		  src="scripts/MathJax-2.5-latest/MathJax.js?config=TeX-AMS_HTML-full">
 		</script>
 	</body>
 </html>

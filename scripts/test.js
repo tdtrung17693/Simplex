@@ -120,11 +120,12 @@ Constraint.prototype._getSignChangedCondition = function () {
 //   }
 // }
 
-Constraint.getCanonicalForm = function (constraints) {
+Constraint.getCanonicalForm = function (fconstraints) {
   var result,
       nVarName = "",
-      has2Phase = [];
-      
+      has2Phase = [],
+      constraints = fconstraints.concat([]);
+
   constraints = constraints.map(function ($constraint) {
     if ($constraint.rside < 0) {
       result = $constraint._getSignChangedCondition($constraint);
@@ -148,10 +149,10 @@ Constraint.getCanonicalForm = function (constraints) {
   });
 
   var constraintMtrx = Constraint.getConstraintMatrix(constraints);
- 
+
+
   var lackUnitMtx = Constraint.checkUnitMatrix(constraintMtrx);
 
-  console.log(lackUnitMtx);
   if (lackUnitMtx.length != constraints.length) {
     for (var i = 0; i < constraints.length; ++i) {
       if (lackUnitMtx.indexOf(i+1) == -1) {
@@ -187,13 +188,9 @@ Constraint.checkUnitMatrix = function (constraints) {
 
   for (var j = 0; j < constraints[0].length; ++j) {
     for (var k = 0; k < cCount; ++k) {
-      if (constraints[k][j] != 0 && constraints[k][j] != 1) {
-        hasOne = 0;
-        break;
-      }
-
-      if (constraints[k][j] == 1 && !hasOne) {
+      if (!hasOne && constraints[k][j] != 0) {
         hasOne = k+1;
+
         if (k == (cCount - 1)) {
           if (previ.indexOf(hasOne) == -1) {
             ++checkMtx;
@@ -257,7 +254,8 @@ Constraint.parseCond = function (condition, varList) {
 }
 
 Constraint.parseElements = function (func) {
-  var lsideEl = func.match(/([-\d]+\w|[\d\w]+)/g),
+  // (-[\d]+[a-zA-Z\-]|-[\w]+|[\w]+)
+  var lsideEl = func.match(/(-[\w]+|[\w]+)/g),
         count = lsideEl.length,
         elArr = [],
         coef, varName;
@@ -286,7 +284,9 @@ function printCanonicalForm(result) {
 function Simplex(objFunc, constraints, varList) {
   this.objFunc = ObjectiveFunction.parseObjectiveFunction(objFunc, varList);
   this.constraints = Simplex.parseConstraints(constraints, varList);
+  console.log(this.constraints);
   this.allVarList = varList;
+  this.mainVar = varList.concat([]);
 }
 
 Simplex.parseConstraints = function (rawConstraints, varList) {
@@ -301,6 +301,7 @@ Simplex.parseConstraints = function (rawConstraints, varList) {
     return constraints;
 }
 
+/** Solve using Simplex Method */
 Simplex.prototype.solve = function () {
   var canonical = Constraint.getCanonicalForm(this.constraints),
       C_T = [],
@@ -309,54 +310,267 @@ Simplex.prototype.solve = function () {
       deltas = [[]],
       delta = 0,
       pivotEl,
-      pivotColIdx;
-
+      pivotColIdx,
+      pivotRowIdx,
+      pivotValue,
+      basicVar,// All separated variable
+      bsCol,
+      bsRow,
+      cantSolve = false;
+  if (this.objFunc.type.match(/max/gi)) {
+    this.objFunc = this.objFunc.changeSign();
+  }
+      
+  this.objFunc.allVarList = this.allVarList;
+  
   if (canonical[1].length > 0) {
+    $("<p />").text("Phase 1").appendTo("body");
+
     var phase2ObjFunc = ObjectiveFunction.parseObjectiveFunction({type:"min", z: canonical[1].join("+")}, this.allVarList);
     
-    console.log(phase2ObjFunc);
     var mtx = Constraint.getConstraintMatrix(canonical[0]);
     C_T.push(phase2ObjFunc.getMatrixRow());
-    console.log(C_T);
+
+    printCanonicalForm(canonical[0]);
+   
     for (var i = 0; i < this.constraints.length; ++i) {
       b.push([this.constraints[i].rside]);
     }
-    console.log(b);
-
-    printMtrx(mtx, "matrix");
-    printMtrx(C_T, "CT");
-    printMtrx(b, "b");
 
     var basicVar = Simplex.getBasicVar(mtx);
-    
-    for (var i = 0; i < basicVar.length; ++i) {
-      Ci.push([phase2ObjFunc.getElementCoef(this.allVarList[ basicVar[i]-1 ])]);
-    }
-    printMtrx(Ci, "Ci");
 
-    for (var i = 0; i < Ci[0].length; ++i) {
-      for (var j = 0; j < mtx[0].length; ++j) {
-        for (var k = 0; k < mtx.length; ++k) {
-          delta += Ci[k][0]*mtx[k][j];
+      printMtrx(mtx, "matrix");
+    for (var i = 0; i < basicVar.row.length; ++i) {
+      bsCol = basicVar.col[i];
+      bsRow = basicVar.row[i];
+
+      Ci[bsRow-1] = [phase2ObjFunc.getElementCoef(this.allVarList[ bsCol-1 ])];
+    }
+
+    deltas = Simplex.getDeltas(Ci, C_T, mtx);
+    var e = 0;
+    
+    while ( Simplex.hasNegativeDelta(deltas) ) {
+      pivotColIdx = Simplex.getMinDeltaIndex(deltas);
+      pivotRowIdx = Simplex.getPivotIndex(mtx, pivotColIdx, b);
+      pivotValue = mtx[pivotRowIdx][pivotColIdx];
+      
+      Simplex.changeMtxAccordingToPivot(pivotValue, {row: pivotRowIdx, col: pivotColIdx}, mtx, b);
+
+      basicVar = Simplex.getBasicVar(mtx);
+      
+      Ci = [];
+      for (var i = 0; i < basicVar.row.length; ++i) {
+        bsCol = basicVar.col[i];
+        bsRow = basicVar.row[i];
+        Ci[bsRow - 1] = [phase2ObjFunc.getElementCoef(this.allVarList[ bsCol-1 ])];
+      }
+      console.log("Ci:", JSON.stringify(Ci));
+
+      deltas = Simplex.getDeltas(Ci, C_T, mtx);
+      $("<div />").append($("<p />").text("Step " + e)).append($("<div />", {id: "p1-matrix-" + e})).appendTo("body");
+      printMtrx(mtx, "p1-matrix-"+e);
+      console.log("var", JSON.stringify(basicVar));
+      console.log("deltas", JSON.stringify(deltas));
+      ++e;
+    }
+
+    basicVar = Simplex.getBasicVar(mtx);
+    printMtrx(b, "b");
+    
+    var varValue = this.getVarValue(mtx, b),
+      result = phase2ObjFunc.getValue(varValue);
+    
+    console.log(result);
+    if (result != 0) cantSolve = true;
+
+    if (cantSolve) {
+      console.log("Cannot solve");
+      return false;
+    } else {
+      $("<p />").text("Phase 2").appendTo("body");
+
+      
+      Ci = [];
+      for (var i = 0; i < basicVar.row.length; ++i) {
+        bsCol = basicVar.col[i];
+        bsRow = basicVar.row[i];
+        Ci[bsRow - 1] = [this.objFunc.getElementCoef(this.allVarList[ bsCol-1 ])];
+      }
+
+      for (var j = 0; j < mtx.length; ++j) {
+        for (var i = 0; i < canonical[1].length; ++i) {
+          mtx[j].splice( this.allVarList.indexOf( canonical[1][i] ) - i, 1 );
         }
-        deltas[0].push(C_T[0][j] - delta);
-        delta=0;
+      }
+      console.log(JSON.stringify(mtx));
+      for (var i = 0; i < canonical[1].length; ++i) {
+        this.allVarList.splice( this.allVarList.indexOf( canonical[1][i] ), 1 );
+      }
+
+      C_T = [];
+      C_T.push(this.objFunc.getMatrixRow());
+
+      deltas = Simplex.getDeltas(Ci, C_T, mtx);
+
+      e = 0;
+      while ( Simplex.hasNegativeDelta(deltas) ) {
+        pivotColIdx = Simplex.getMinDeltaIndex(deltas);
+        pivotRowIdx = Simplex.getPivotIndex(mtx, pivotColIdx, b);
+        console.log("Pivot", pivotColIdx, pivotRowIdx);
+        console.log("Delta", JSON.stringify(deltas));
+        console.log("C_T", JSON.stringify(C_T));
+        console.log("Ci", JSON.stringify(Ci));
+        pivotValue = mtx[pivotRowIdx][pivotColIdx];
+        
+        Simplex.changeMtxAccordingToPivot(pivotValue, {row: pivotRowIdx, col: pivotColIdx}, mtx, b);
+
+        basicVar = Simplex.getBasicVar(mtx);
+        
+        Ci = [];
+        for (var i = 0; i < basicVar.row.length; ++i) {
+          bsCol = basicVar.col[i];
+          bsRow = basicVar.row[i];
+          Ci[bsRow - 1] = [this.objFunc.getElementCoef(this.allVarList[ bsCol-1 ])];
+        }
+        console.log("Ci:", JSON.stringify(Ci));
+
+        deltas = Simplex.getDeltas(Ci, C_T, mtx);
+        $("<div />").append($("<p />").text("Step " + e)).append($("<div />", {id: "p2-matrix-" + e})).appendTo("body");
+        printMtrx(mtx, "p2-matrix-"+e);
+        console.log("var", JSON.stringify(basicVar));
+        console.log("deltas", JSON.stringify(deltas));
+        ++e;
+      }
+    } 
+  } else { 
+
+      $("<p />").text("Solution").appendTo("body");
+
+      var mtx = Constraint.getConstraintMatrix(canonical[0]);
+      C_T.push(this.objFunc.getMatrixRow());
+
+      printCanonicalForm(this.constraints);
+     
+      for (var i = 0; i < this.constraints.length; ++i) {
+        b.push([this.constraints[i].rside]);
+      }
+
+      var basicVar = Simplex.getBasicVar(mtx);
+
+      printMtrx(mtx, "matrix");
+      printMtrx(b, "b");
+      printMtrx(C_T, "CT");
+
+      for (var i = 0; i < basicVar.row.length; ++i) {
+        bsCol = basicVar.col[i];
+        bsRow = basicVar.row[i];
+
+        Ci[bsRow-1] = [ this.objFunc.getElementCoef(this.allVarList[ bsCol-1 ]) ];
+      }
+
+      deltas = Simplex.getDeltas(Ci, C_T, mtx);
+      printMtrx(Ci, "Ci");
+      printMtrx(deltas, "Delta");
+      var e = 0;
+
+      while ( Simplex.hasNegativeDelta(deltas) ) {
+        pivotColIdx = Simplex.getMinDeltaIndex(deltas);
+        pivotRowIdx = Simplex.getPivotIndex(mtx, pivotColIdx, b);
+        console.log(JSON.stringify(deltas));
+        pivotValue = mtx[pivotRowIdx][pivotColIdx];
+        
+        Simplex.changeMtxAccordingToPivot(pivotValue, {row: pivotRowIdx, col: pivotColIdx}, mtx, b);
+
+        basicVar = Simplex.getBasicVar(mtx);
+        
+        Ci = [];
+        for (var i = 0; i < basicVar.row.length; ++i) {
+          bsCol = basicVar.col[i];
+          bsRow = basicVar.row[i];
+          Ci[bsRow - 1] = [this.objFunc.getElementCoef(this.allVarList[ bsCol-1 ])];
+        }
+        console.log("Ci:", JSON.stringify(Ci));
+
+        deltas = Simplex.getDeltas(Ci, C_T, mtx);
+        $("<div />").append($("<p />").text("Step " + e)).append($("<div />", {id: "p2-matrix-" + e})).appendTo("body");
+        printMtrx(mtx, "p2-matrix-"+e);
+        ++e;
       }
     }
 
-    printMtrx(deltas, "Delta");
-
-    console.log(deltas);
-   
-    // while ( Simplex.hasNegativeDelta(deltas) ) {
-      pivotColIdx = Simplex.getMinDeltaIndex(deltas);
-      pivotRowIdx = Simplex.getPivotIndex(mtx, pivotColIdx, b);
-      console.log(mtx[pivotRowIdx][pivotColIdx]);
-
-    // }
-  }
+    return this.objFunc.getValue( this.getVarValue(mtx,b) );
 }
 
+Simplex.prototype.dualPhase = function () {
+
+}
+
+Simplex.prototype.getVarValue = function (mtx, b) {
+    var basicVar = Simplex.getBasicVar(mtx),
+      varValue = [],
+      varName = [],
+      varList = this.allVarList;
+
+  for (var i = 0; i < basicVar.col.length; ++i) {
+    varName[basicVar.row[i] - 1] = this.mainVar[ basicVar.col[i] - 1];
+  }
+
+  for (var i = 0; i < varList.length; ++i) {
+    if (varName.indexOf( varList[i] ) > -1) {
+      varValue[i] = b[ varName.indexOf( varList[i] ) ][0];
+    } else {
+      varValue[i] = 0;
+    }
+  }
+  console.log("Value", JSON.stringify(varValue));
+  return varValue;
+}
+
+Simplex.changeMtxAccordingToPivot = function (pivotValue, pivotIndex, mtx, b) {
+  var coef = 0;
+
+  for ( var i = 0; i < mtx[0].length; ++i ) {
+    mtx[pivotIndex.row][i] = Math.floor((mtx[pivotIndex.row][i] / pivotValue)*100)/100;
+  }
+  b[pivotIndex.row][0] = Math.floor((b[pivotIndex.row][0] / pivotValue)*100)/100;
+
+  for ( var i = 0; i < mtx.length; ++i ) {
+    if ( i == pivotIndex.row ) continue; // Not change pivot row
+    
+    for ( var j = 0; j < mtx[0].length; ++j ) {
+      if ( j == 0 ) coef = mtx[i][pivotIndex.col]; // Assign value to avoid object reference in javascript
+      
+      mtx[i][j] = mtx[i][j] - mtx[pivotIndex.row][j] * coef;
+    }
+
+    b[i][0] = Math.floor((b[i][0] - b[pivotIndex.row][0] * coef)*100)/100;
+
+    coef = 0;
+  }
+
+}
+
+Simplex.changeBMatrix = function (pivotIndex, b) {
+
+}
+
+Simplex.getDeltas = function (Ci, C_T, mtx) {
+  var deltas = [[]],
+      delta = 0;
+
+  for (var i = 0; i < Ci[0].length; ++i) {
+    for (var j = 0; j < mtx[0].length; ++j) {
+      for (var k = 0; k < mtx.length; ++k) {
+        delta += Math.floor(Ci[k][0]*mtx[k][j]*100)/100;
+      }
+      deltas[0].push(Math.floor((C_T[0][j] - delta)*100)/100);
+      delta=0;
+    }
+  }
+
+  return deltas;  
+}
 
 Simplex.getBasicVar = function (constraints) {
   var hasUnitMatrix = false,
@@ -364,42 +578,43 @@ Simplex.getBasicVar = function (constraints) {
 
   var checkMtx = 0,
       i = 0,
-      previ = [],
+      previ = {col: [], row: []},
       hasOne = 0;
 
   for (var j = 0; j < constraints[0].length; ++j) {
     for (var k = 0; k < cCount; ++k) {
-      if (constraints[k][j] != 0 && constraints[k][j] != 1) {
-        hasOne = 0;
-        break;
-      }
 
-      if (constraints[k][j] == 1 && !hasOne) {
-        hasOne = j+1;
+      if (!hasOne && constraints[k][j] != 0) {
+
+        hasOne = k+1;
+
         if (k == (cCount - 1)) {
-          if (previ.indexOf(hasOne) == -1) {
+          if (previ.row.indexOf(hasOne) == -1) {
             ++checkMtx;
-            previ.push(hasOne);
+            previ.row.push(hasOne);
+            previ.col.push(j+1);
           }
           hasOne = 0;
         }
+
       } else if (hasOne && constraints[k][j] != 0) {
+
         hasOne = 0;
         break;
+
       } else if (k == (cCount - 1) && hasOne) {
-        if (previ.indexOf(hasOne) == -1) {
+
+        if (previ.row.indexOf(hasOne) == -1) {
           ++checkMtx;
-          previ.push(hasOne);
+          previ.row.push(hasOne);
+          previ.col.push(j+1);
         }
+
         hasOne = 0;
       }
     }
   }
 
-  if (checkMtx >= cCount) {
-    hasUnitMatrix = true;
-  }
-  
   return previ;
 }
 
@@ -412,7 +627,11 @@ Simplex.getMinDeltaIndex = function (deltas) {
 Simplex.getPivotIndex = function (mtx, index, b) {
   var tempArr = [];
   for (var i = 0; i < mtx.length; ++i) {
-    tempArr.push(b[i][0]/mtx[i][index]);
+    if (mtx[i][index] < 0) {
+      tempArr.push(Infinity);
+    } else {
+      tempArr.push(b[i][0]/mtx[i][index]);
+    }
   }
 
   return tempArr.indexOf(Math.min.apply(Math, tempArr));
@@ -420,8 +639,8 @@ Simplex.getPivotIndex = function (mtx, index, b) {
 
 
 Simplex.hasNegativeDelta = function (deltas) {
-  for (var i = 0; i < deltas.length; ++i) {
-    if (deltas[i] < 0) return true;
+  for (var i = 0; i < deltas[0].length; ++i) {
+    if (deltas[0][i] < 0) return true;
   }
 
   return false;
@@ -446,7 +665,7 @@ ObjectiveFunction.prototype.changeSign = function () {
     }
   }
 
-  return ObjectiveFunction.parseObjectiveFunction({p1: tempLside, op: tempOp, p2: tempRside}, this.allVarList);
+  return ObjectiveFunction.parseObjectiveFunction({type: "min", z: tempZ}, this.allVarList);
 }
 
 ObjectiveFunction.prototype.getElementCoef = function (varName) {
@@ -466,7 +685,7 @@ ObjectiveFunction.parseObjectiveFunction = function (objFunc, varList) {
 }
 
 ObjectiveFunction.parseElements = function (func) {
-  var lsideEl = func.match(/([-\d]+\w|[\d\w]+)/g),
+  var lsideEl = func.match(/(-[\w]+|[\w]+)/g),
         count = lsideEl.length,
         elArr = [],
         coef, varName;
@@ -525,6 +744,16 @@ ObjectiveFunction.prototype.getMatrixRow = function () {
   return row;
 }
 
+ObjectiveFunction.prototype.getValue = function (varValue) {
+  var result = 0;
+
+  for (var i = 0; i < this.allVarList.length; ++i) {
+    console.log(this.getElementCoef( this.allVarList[i] ), varValue[i]);
+    result += this.getElementCoef( this.allVarList[i] ) * varValue[i];
+  }
+
+  return result;
+}
 
 function printMtrx(mtrx, id) {
   var col = mtrx.length,
@@ -535,24 +764,104 @@ function printMtrx(mtrx, id) {
   }
 
   str += "\\end{vmatrix}\\)";
-  console.log(str);
   $("#"+id).html(str);
-  MathJax.Hub.Queue(["Typeset", MathJax.Hub, "matrix"]);
+  MathJax.Hub.Queue(["Typeset", MathJax.Hub, id]);
 }
 
+function getTableaus(tableauJSON) {
+  return JSON.parse(tableauJSON);
+}
 
+function printTableau (tableau, varList, artVar, phase) {
+  if (phase == 2 && tableau.step == 1) {
+    $("body").append($("<p />").text("Phase " + tableau.phase));
+  }
 
-var allVar = ["x","y","z"],
-    b = allVar.concat([]),
-    constraints = [];
+  $("body").append($("<p />").text("Step " + tableau.step));
 
-    constraints.push(({p1:"x+y+z", op:"=", p2:"2"}));
-    constraints.push(({p1:"x-2y+3z", op:"=", p2:"3"}));
-// var a = Constraint.getCanonicalForm(constraints);
-var objFunc = {type: "min", z: "x-y"};
-var sx = new Simplex(objFunc, constraints, allVar);
-console.log(sx);
-sx.solve();
-// printCanonicalForm(a[0]);
+  var table = "<table id='tableau'>"
+        + "<thead>"
+        + "<tr>"
+        + "<th>\\(C_i\\)</th>"
+        + "<th>i</th>"
+        + "</tr>";
+        + "</thead>";
+        + "</table>";
+  
+  tableau.b = JSON.parse(tableau.b);
+
+  var allVar = varList.concat([]);
+
+  if (phase == 2 && tableau.phase == 1) {
+    allVar = allVar.concat(artVar);
+  }
+  table = $(table);
+
+  table.appendTo("body");
+
+  for (var i = 0; i < allVar.length; ++i) {
+    table.find("thead > tr").append($("<th />").text("\\("+allVar[i]+"\\)"));
+  }
+
+  table.find("thead > tr").append($("<th />").text("\\(\\mathbf b\\)"));
+  
+  var mtx = JSON.parse(tableau.matrix);
+  console.log(mtx);
+  var tBody = $("<tbody />");
+  var tRow;
+  table.append(tBody);
+
+  var idx = [];
+
+  for (var i = 0; i < tableau.i.col.length; ++i) {
+    idx[tableau.i.row[i] - 1] = tableau.i.col[i];
+  }
+  console.log(idx);
+  for (var i = 0; i < mtx.length; ++i) {
+    tRow = $("<tr />");
+
+    for (var j = 0; j < allVar.length + 3; ++j) {// 3 row of Ci, i and b {
+      if (j == 0) {
+        tRow.append($("<td />").text(tableau.Ci[i][0]));
+      } else if (j == 1) {
+        tRow.append($("<td />").text(idx[i]));
+      } else if (j == allVar.length + 2) {
+        tRow.append($("<td />").text(tableau.b[i][0]));
+      } else {
+        tRow.append($("<td />").text(mtx[i][j-2]));
+      }
+    }
+
+    tBody.append(tRow);
+  }
+
+  tRow = $("<tr />");
+
+  tRow.append($("<td />").attr("colspan", 2).text("\\(C^T\\)"));
+
+  for (var i = 0; i < tableau.C_T[0].length; ++i) {
+    tRow.append($("<td />").text(tableau.C_T[0][i]));
+  }
+
+  tRow.appendTo(tBody);
+
+  tRow = $("<tr />");
+
+  tRow.append($("<td />").attr("colspan", 2).text("\\(\\bar{C^T}\\)"));
+
+  for (var i = 0; i < tableau.deltas[0].length; ++i) {
+    tRow.append($("<td />").text(tableau.deltas[0][i]));
+  }
+
+  tRow.appendTo(tBody);
+
+}
+
+var str = '[{"phase":1,"step":1,"C_T":[[0,0,0,0,0,1,1]],"matrix":"[[1,-4,2,-5,9,0,0],[0,1,-3,4,-5,1,0],[0,1,-1,1,-1,0,1]]","b":"[[3],[6],[1]]","deltas":[[0,-2,4,-5,6,0,0]],"Ci":[[0],[1],[1]],"i":{"col":[1,6,7],"row":[1,2,3]}},{"phase":1,"step":2,"C_T":[[0,0,0,0,0,1,1]],"matrix":"[[1,1,-3,0,4,0,5],[0,-3,1,0,-1,1,-4],[0,1,-1,1,-1,0,1]]","b":"[[8],[2],[1]]","deltas":[[0,3,-1,0,1,0,5]],"Ci":[[0],[1],[0]],"i":{"col":[1,4,6],"row":[1,3,2]}},{"phase":1,"step":3,"C_T":[[0,0,0,0,0,1,1]],"matrix":"[[1,-8,0,0,1,3,-7],[0,-3,1,0,-1,1,-4],[0,-2,0,1,-2,1,-3]]","b":"[[14],[2],[3]]","deltas":[[0,0,0,0,0,1,1]],"Ci":[[0],[0],[0]],"i":{"col":[1,3,4],"row":[1,2,3]}},{"phase":2,"step":1,"C_T":[[2,6,-5,1,4]],"matrix":"[[1,-8,0,0,1],[0,-3,1,0,-1],[0,-2,0,1,-2]]","b":"[[14],[2],[3]]","deltas":[[0,9,0,0,-1]],"Ci":[[2],[-5],[1]],"i":{"col":[1,3,4],"row":[1,2,3]}},{"phase":2,"step":2,"C_T":[[2,6,-5,1,4]],"matrix":"[[1,-8,0,0,1],[1,-11,1,0,0],[2,-18,0,1,0]]","b":"[[14],[16],[31]]","deltas":[[1,1,0,0,0]],"Ci":[[4],[-5],[1]],"i":{"col":[3,4,5],"row":[2,3,1]}}]';
 // printMtrx(Constraint.getConstraintMatrix(a[0]));
 // console.log(a[1]);
+tableaus = (getTableaus(str));
+console.log(tableaus);
+for (var i = 0; i < tableaus.length; ++i) {
+  printTableau(tableaus[i],["x_1","x_2","x_3","x_4","x_5"],["x_6","x_7"], 2);
+}

@@ -1,0 +1,583 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"print",
+				"printTableau"
+			],
+			[
+				"talb",
+				"tableau"
+			],
+			[
+				"appe",
+				"appendTo"
+			],
+			[
+				"tab",
+				"tableaus"
+			],
+			[
+				"phase",
+				"phase2ObjFunc"
+			],
+			[
+				"string",
+				"stringify"
+			],
+			[
+				"phas",
+				"phase2ObjFunc"
+			],
+			[
+				"ai",
+				"available"
+			],
+			[
+				"prin",
+				"printCanonicalForm"
+			],
+			[
+				"main",
+				"mainVar"
+			],
+			[
+				"get",
+				"getBasicVar"
+			],
+			[
+				"allVar",
+				"allVarList"
+			],
+			[
+				"all",
+				"allVarList"
+			],
+			[
+				"piv",
+				"pivotValue"
+			],
+			[
+				"cons",
+				"Constraint"
+			],
+			[
+				"constr",
+				"constraint"
+			],
+			[
+				"constrain",
+				"constraintMtrx"
+			],
+			[
+				"chan",
+				"changeMtxAccordingToPivot"
+			],
+			[
+				"pivo",
+				"pivotColIdx"
+			],
+			[
+				"index",
+				"indexOf"
+			],
+			[
+				"del",
+				"deltas"
+			],
+			[
+				"has",
+				"hasNegativeDelta"
+			],
+			[
+				"getCoe",
+				"getElementCoef"
+			],
+			[
+				"Objec",
+				"ObjectiveFunction"
+			],
+			[
+				"el",
+				"elements"
+			],
+			[
+				"const",
+				"constraint"
+			],
+			[
+				"ca",
+				"canonical"
+			],
+			[
+				"obj",
+				"objFunc"
+			],
+			[
+				"getM",
+				"getMatrixRow"
+			],
+			[
+				"change",
+				"changeSign"
+			],
+			[
+				"Obje",
+				"ObjectiveFunction"
+			],
+			[
+				"getC",
+				"getConstraintMatrix"
+			],
+			[
+				"getCon",
+				"getConstraintMatrix"
+			],
+			[
+				"getCnon",
+				"getCanonicalForm"
+			],
+			[
+				"add",
+				"addNewArtElem"
+			],
+			[
+				"check",
+				"checkUnitMatrix"
+			],
+			[
+				"getMa",
+				"getMatrixRow"
+			],
+			[
+				"cond",
+				"conditions"
+			],
+			[
+				"parseC",
+				"parseConditions"
+			],
+			[
+				"varL",
+				"allVarList"
+			],
+			[
+				"allVa",
+				"allVarList"
+			],
+			[
+				"allV",
+				"allVarList"
+			],
+			[
+				"result",
+				"resultCtrl"
+			],
+			[
+				"$lo",
+				"$location	AngularJS"
+			],
+			[
+				"$rou",
+				"$routeProvider	AngularJS"
+			],
+			[
+				"script",
+				"scripts"
+			],
+			[
+				"str",
+				"strict"
+			],
+			[
+				"Fi",
+				"FIREBASE_URL"
+			],
+			[
+				"scr",
+				"scripts"
+			],
+			[
+				"cont",
+				"controller	AngularJS"
+			],
+			[
+				"$routeP",
+				"$routeParams	AngularJS"
+			],
+			[
+				"dele",
+				"delete"
+			],
+			[
+				"fa",
+				"factory	AngularJS"
+			],
+			[
+				"delet",
+				"deletePost($index"
+			],
+			[
+				"angular",
+				"angular-route"
+			],
+			[
+				"ang",
+				"angular-touch"
+			],
+			[
+				"angul",
+				"angular-cookies"
+			],
+			[
+				"angu",
+				"angular-resource"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 400.0,
+		"last_filter": "al",
+		"selected_items":
+		[
+			[
+				"al",
+				"Snippet: bs3-alert-danger"
+			],
+			[
+				"table",
+				"Snippet: bs3-panel-table"
+			],
+			[
+				"tab",
+				"Snippet: bs3-table"
+			],
+			[
+				"tabl",
+				"Snippet: bs3-table"
+			],
+			[
+				"panel",
+				"Snippet: bs3-panel"
+			],
+			[
+				"pac",
+				"Package Control: Install Package"
+			],
+			[
+				"form",
+				"Snippet: bs3-form-inline"
+			],
+			[
+				"contain",
+				"Snippet: bs3-container"
+			],
+			[
+				"nav",
+				"Snippet: bs3-navbar"
+			],
+			[
+				"templ",
+				"Snippet: bs3-html5-template"
+			],
+			[
+				"p",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 754.0
+	},
+	"console":
+	{
+		"height": 132.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/opt/lampp/htdocs/simplex",
+		"/opt/lampp/htdocs/simplex/scripts",
+		"/opt/lampp/htdocs/simplex/scripts/controllers",
+		"/opt/lampp/htdocs/simplex/scripts/directives",
+		"/opt/lampp/htdocs/simplex/scripts/lib",
+		"/opt/lampp/htdocs/simplex/views"
+	],
+	"file_history":
+	[
+		"/opt/lampp/htdocs/simplex/scripts/directives/cond.js",
+		"/opt/lampp/htdocs/simplex/scripts/controllers/simplexCtrl.js",
+		"/opt/lampp/htdocs/simplex/scripts/lib/Constraint.js",
+		"/opt/lampp/htdocs/simplex/scripts/lib/ObjectiveFunction.js",
+		"/home/tdtrung17693/z.sh",
+		"/opt/lampp/htdocs/simplex/scripts/lib/Simplex.js",
+		"/opt/lampp/htdocs/simplex/scripts/lib/Tabular.js",
+		"/opt/lampp/htdocs/simplex/views/main.html",
+		"/opt/lampp/htdocs/simplex/index.html",
+		"/home/tdtrung17693/.homestead/Homestead.yaml",
+		"/usr/share/applications/google-chrome.desktop",
+		"/home/tdtrung17693/.zshrc",
+		"/opt/lampp/etc/php.ini",
+		"/opt/lampp/htdocs/simplex/scripts/MathJax-2.5-latest/test/sample-tex.html",
+		"/opt/lampp/htdocs/simplex/scripts/MathJax-2.5-latest/test/examples.html",
+		"/home/tdtrung17693/.cache/.fr-f9D9vm/MathJax-2.5-latest/test/index.html",
+		"/opt/lampp/htdocs/simplex/views/cond.html",
+		"/opt/lampp/htdocs/simplex/test.html",
+		"/opt/lampp/htdocs/simplex/scripts/test.js",
+		"/opt/lampp/htdocs/simplex/backup2.js",
+		"/opt/lampp/htdocs/simplex.rb",
+		"/opt/lampp/htdocs/SimplexJS/TestSimplexJS.js",
+		"/opt/lampp/htdocs/YASMIJ.js/demo/js/demo.js",
+		"/opt/lampp/htdocs/YASMIJ.js/demo/demo.html",
+		"/opt/lampp/htdocs/YASMIJ.js/index.html",
+		"/opt/lampp/htdocs/simplex/scripts/lib/Element.js",
+		"/opt/lampp/htdocs/simplex/backup.js",
+		"/opt/lampp/htdocs/simplex/scripts/app.js",
+		"/opt/lampp/htdocs/simplex/style/main.css",
+		"/home/tdtrung17693/www/simplex/.gitignore",
+		"/home/tdtrung17693/www/.zshrc",
+		"/home/tdtrung17693/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
+		"/home/tdtrung17693/.config/sublime-text-3/Packages/Default/Preferences.sublime-settings",
+		"/home/tdtrung17693/.vimrc",
+		"/home/tdtrung17693/index.html",
+		"/home/tdtrung17693/index.hmtl",
+		"/home/tdtrung17693/.vim/.vimrc",
+		"/opt/lampp/htdocs/simplex/scripts/directives.js",
+		"/opt/lampp/etc/httpd.conf",
+		"/etc/rc.local",
+		"/home/tdtrung17693/www/simplex/view.html",
+		"/home/tdtrung17693/www/simplex/views/main.html",
+		"/home/tdtrung17693/www/simplex/style/main.css",
+		"/home/tdtrung17693/www/simplex/bower_components/bootstrap/dist/css/bootstrap.css",
+		"/home/tdtrung17693/www/ang-news/app/scripts/app.js",
+		"/home/tdtrung17693/www/ang-news/app/scripts/controllers/posts.js",
+		"/home/tdtrung17693/www/ang-news/app/scripts/services/post.js",
+		"/home/tdtrung17693/www/ang-news/app/views/nav.html",
+		"/home/tdtrung17693/www/ang-news/app/scripts/controllers/auth.js",
+		"/home/tdtrung17693/www/ang-news/app/views/showpost.html",
+		"/home/tdtrung17693/www/ang-news/app/scripts/controllers/nav.js",
+		"/home/tdtrung17693/www/ang-news/app/scripts/controllers/postView.js",
+		"/home/tdtrung17693/www/ang-news/app/scripts/services/auth.js",
+		"/home/tdtrung17693/www/ang-news/app/views/register.html",
+		"/home/tdtrung17693/www/ang-news/bower_components/angularfire/dist/angularfire.js",
+		"/home/tdtrung17693/www/ang-news/app/views/profile.html",
+		"/home/tdtrung17693/www/ang-news/app/scripts/services/profile.js",
+		"/home/tdtrung17693/www/ang-news/app/scripts/controllers/profile.js",
+		"/home/tdtrung17693/www/ang-news/app/views/posts.html",
+		"/home/tdtrung17693/www/ang-news/app/scripts/filters/url.js",
+		"/home/tdtrung17693/www/ang-news/app/views/login.html",
+		"/home/tdtrung17693/www/ang-news/app/index.html",
+		"/home/tdtrung17693/www/ang-news/bower_components/mockfirebase/bower.json",
+		"/home/tdtrung17693/www/ang-news/bower.json",
+		"/home/tdtrung17693/.config/sublime-text-3/Packages/Terminal/Default (Linux).sublime-keymap",
+		"/home/tdtrung17693/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap",
+		"/home/tdtrung17693/www/ang-news/.jshintrc",
+		"/home/tdtrung17693/www/ang-news/app/scripts/controllers/posts/ks",
+		"/home/tdtrung17693/.config/sublime-text-3/Packages/AdvancedNewFile/Default (Linux).sublime-keymap",
+		"/home/tdtrung17693/.bash_profile",
+		"/home/tdtrung17693/.profile",
+		"/home/tdtrung17693/.bashrc",
+		"/home/tdtrung17693/Downloads/node-v0.12.2/README.md",
+		"/home/tdtrung17693/www/ang-news/package.json",
+		"/home/tdtrung17693/.nvm/nvm.sh",
+		"/home/tdtrung17693/bash_profile",
+		"/home/tdtrung17693/.config/sublime-text-3/Packages/Terminal/Terminal.sublime-settings",
+		"/home/tdtrung17693/.config/sublime-text-3/Packages/Default/Default (Linux).sublime-keymap"
+	],
+	"find":
+	{
+		"height": 41.0
+	},
+	"find_in_files":
+	{
+		"height": 106.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"Startup",
+			"openssl",
+			"openssl.",
+			"openssl",
+			"JSON.",
+			"$scope.conditions",
+			"Usage",
+			"JSON.stringify",
+			"mainvar.push",
+			"getBas",
+			"print",
+			"f.z",
+			"parseE",
+			"parseEl",
+			"Ci",
+			"printMtr",
+			"4y",
+			"checkUnitMatr",
+			":\"<=\",",
+			"canonicalform",
+			"Condition.",
+			"constraint",
+			"$constraint",
+			"Condition",
+			"constraints.",
+			"Constraint",
+			"allVarList",
+			"this",
+			"[j][k]",
+			"Condition.",
+			"allVarList",
+			"this",
+			"tempLside",
+			"Bundle",
+			"user ",
+			"user",
+			"User ",
+			"box-sha",
+			"input",
+			"form-control:focu",
+			"form-group",
+			"label",
+			"_authClient",
+			"login",
+			".login",
+			"$login",
+			"$Login",
+			"/>\n",
+			"nvm"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"$scope.constraints",
+			"",
+			"[k][j]",
+			"Constraint.",
+			"Plugin"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 29.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "Simplex.sublime-project",
+	"replace":
+	{
+		"height": 78.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 218.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

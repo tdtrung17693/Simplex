@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
+  <style>
+  table, th, td {
+      border: 1px solid black;
+  }
+
+  th, td {
+    padding: 5px;
+  }
+  </style>
 </head>
 <body>
   <div id="form"></div>
-  <div>
-    <p>Constraint Matrix</p>
-    <div id="matrix"></div>
-  </div>
+
   <div>
     <p>b Matrix</p>
     <div id="b"></div>
@@ -26,6 +32,12 @@
     <p>Delta Matrix</p>
     <div id="Delta"></div>
   </div>
+  <div>
+    <p>Constraint Matrix</p>
+    <div id="matrix"></div>
+    <div id="Delta"></div>
+  </div>
+  <br>
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
   <script type="text/x-mathjax-config">
     MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
