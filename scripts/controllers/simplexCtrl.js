@@ -16,6 +16,7 @@ app.controller('simplexCtrl', ['$scope', function($scope){
 
     var solution = simplex.solve();
 
+
     if ( !solution ) {
       $scope.cantSolve = true;
     } else {
@@ -29,6 +30,7 @@ app.controller('simplexCtrl', ['$scope', function($scope){
           + '<strong>Result: </strong> <span></span>'
           +'</div>';
       $(".panel.result > .panel-body").html(result);
+
 
       printMtrx(solution.var_value, "matrix");
       printCanonicalForm(solution.canonical);
